@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kopfrechen-Trainer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 0;
+            margin: 0;
+            background-color: #f9f9f9;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .card {
+            width: 90%;
+            max-width: 400px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            margin: 10px 0;
+            padding: 12px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #result {
+            font-size: 1.5rem;
+            margin: 15px 0;
+        }
+
+        #final-score {
+            font-size: 1.2rem;
+            margin-top: 15px;
+        }
+
+        .result-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .result-column {
+            flex: 1;
+            margin: 0 5px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-column h3 {
+            margin: 0;
+            padding: 10px;
+            background-color: #f2f2f2;
+            border-bottom: 1px solid #ccc;
+            font-size: 1rem;
+        }
+
+        .result-column ul {
+            list-style: none;
+            padding: 10px;
+            margin: 0;
+        }
+
+        .result-column ul li {
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 375px) {
+            button {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            #result {
+                font-size: 1.2rem;
+            }
+
+            #final-score {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div id="question">Klicke auf Start, um zu beginnen!</div>
+
+        <div id="controls">
+            <button id="show-answer" style="display: none;">Lösung zeigen</button>
+            <button id="correct" style="display: none;">Richtig</button>
+            <button id="wrong" style="display: none;">Falsch</button>
+        </div>
+
+        <div id="result"></div>
+        <div id="final-score" style="display: none;"></div>
+
+        <div id="result-summary" class="result-container" style="display: none;">
+            <div class="result-column" id="correct-column">
+                <h3>Richtig</h3>
+                <ul></ul>
+            </div>
+            <div class="result-column" id="wrong-column">
+                <h3>Falsch</h3>
+                <ul></ul>
+            </div>
+        </div>
+
+        <button id="start-game">Start</button>
+    </div>
+
+    <script>
+        const questionElement = document.getElementById('question');
+        const showAnswerButton = document.getElementById('show-answer');
+        const correctButton = document.getElementById('correct');
+        const wrongButton = document.getElementById('wrong');
+        const resultElement = document.getElementById('result');
+        const finalScoreElement = document.getElementById('final-score');
+        const startGameButton = document.getElementById('start-game');
+        const resultSummary = document.getElementById('result-summary');
+        const correctColumn = document.getElementById('correct-column').querySelector('ul');
+        const wrongColumn = document.getElementById('wrong-column').querySelector('ul');
+
+        let currentAnswer = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let round = 0;
+        const totalRounds = 20;
+        const answers = [];
+
+        function generateQuestion() {
+            const num1 = Math.floor(Math.random() * 30) + 1;
+            const num2 = Math.floor(Math.random() * 30) + 1;
+
+            currentAnswer = num1 * num2;
+            questionElement.textContent = `${num1} × ${num2}`;
+        }
+
+        function startGame() {
+            round = 0;
+            correctCount = 0;
+            wrongCount = 0;
+            answers.length = 0;
+            resultElement.textContent = '';
+            finalScoreElement.style.display = 'none';
+            resultSummary.style.display = 'none';
+            correctColumn.innerHTML = '';
+            wrongColumn.innerHTML = '';
+
+            startGameButton.style.display = 'none';
+            showAnswerButton.style.display = 'inline';
+            correctButton.style.display = 'none';
+            wrongButton.style.display = 'none';
+
+            nextRound();
+        }
+
+        function nextRound() {
+            if (round >= totalRounds) {
+                endGame();
+                return;
+            }
+
+            round++;
+            generateQuestion();
+            resultElement.textContent = '';
+            showAnswerButton.style.display = 'inline';
+            correctButton.style.display = 'none';
+            wrongButton.style.display = 'none';
+        }
+
+        function showAnswer() {
+            resultElement.textContent = `Lösung: ${currentAnswer}`;
+            showAnswerButton.style.display = 'none';
+            correctButton.style.display = 'inline';
+            wrongButton.style.display = 'inline';
+        }
+
+        function recordAnswer(isCorrect) {
+            const questionText = questionElement.textContent;
+
+            if (isCorrect) {
+                correctCount++;
+                answers.push({ question: questionText, isCorrect: true });
+            } else {
+                wrongCount++;
+                answers.push({ question: questionText, isCorrect: false });
+            }
+
+            nextRound();
+        }
+
+        function endGame() {
+            questionElement.textContent = 'Spiel beendet!';
+            finalScoreElement.textContent = `Richtig: ${correctCount}, Falsch: ${wrongCount}`;
+            finalScoreElement.style.display = 'block';
+            startGameButton.style.display = 'inline';
+            showAnswerButton.style.display = 'none';
+            correctButton.style.display = 'none';
+            wrongButton.style.display = 'none';
+
+            resultSummary.style.display = 'flex';
+            answers.forEach(({ question, isCorrect }) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = question;
+
+                if (isCorrect) {
+                    correctColumn.appendChild(listItem);
+                } else {
+                    wrongColumn.appendChild(listItem);
+                }
+            });
+        }
+
+        startGameButton.addEventListener('click', startGame);
+        showAnswerButton.addEventListener('click', showAnswer);
+        correctButton.addEventListener('click', () => recordAnswer(true));
+        wrongButton.addEventListener('click', () => recordAnswer(false));
+    </script>
+</body>
+</html>
