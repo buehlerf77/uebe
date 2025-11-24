@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Kopfrechnen Trainer</title>
+<style>
+body{font-family:sans-serif;text-align:center;margin-top:30px;transition:background-color 0.2s;position:relative;}
+#task{font-size:2em;margin:20px}
+input{font-size:1em;padding:5px;width:80px;text-align:center}
+#stats{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-size:1em;width:400px;text-align:center}
+.stats-row{display:flex;justify-content:space-between;margin:2px 0}
+.correct{color:green}.wrong{color:red}
+#correctAnswer{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5em;font-weight:bold;color:black;display:none;}
+</style>
+</head>
+<body>
+<h1>Kopfrechnen Übung</h1>
+<div id="task"></div>
+<input id="answer" placeholder="Antwort" autofocus>
+<div id="correctAnswer"></div>
+<div id="stats">
+<div><span id="total">0</span></div>
+<div class="stats-row">
+<div class="correct"><span id="correct">0</span></div>
+<div class="wrong"><span id="wrong">0</span></div>
+</div>
+<div class="stats-row">
+<div class="correct"><span id="correctPercent">0</span>%</div>
+<div class="wrong"><span id="wrongPercent">0</span>%</div>
+</div>
+</div>
+<script>
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+const taskTypes={
+type1:()=>{let a=rand(10,99),b=rand(10,99);if(Math.random()<0.66&&a+b<=100){a+=rand(1,20)}else if(Math.random()>=0.66&&a+b>100){a-=rand(1,20)}return{question:`${a} + ${b}`,answer:a+b}},
+type2:()=>{let a=rand(10,99),b=rand(10,99);if(Math.random()<0.66&&a-b>=0){a=rand(10,b-1)}else if(Math.random()>=0.66&&a-b<0){a=rand(b+1,99)}return{question:`${a} - ${b}`,answer:a-b}},
+type3:()=>{let abb,cdd;do{let A=rand(1,9),C=rand(0,A-1),B=rand(0,9),D=rand(B+1,9);abb=A*100+B*10+B;cdd=C*100+D*10+D}while(abb-cdd<=0);return{question:`${abb} - ${cdd}`,answer:abb-cdd}},
+type4:()=>{let x=rand(1,30),y=rand(1,30);return{question:`${x} × ${y}`,answer:x*y}},
+type5:()=>{let x=rand(2,9),y=rand(2,9),z=rand(11,19),arr=[x,y,z];arr.sort(()=>Math.random()-0.5);return{question:`${arr[0]} × ${arr[1]} × ${arr[2]}`,answer:x*y*z}},
+type6:()=>{let x=rand(2,10);return{question:`${x}³`,answer:x*x*x}},
+type7:()=>{let x=rand(101,999),y=rand(2,9);return{question:`${x} × ${y}`,answer:x*y}}
+};
+let currentTask=null,total=0,correct=0,wrong=0;
+function updateStats(isCorrect){total++;if(isCorrect)correct++;else wrong++;document.getElementById("total").innerText=total;document.getElementById("correct").innerText=correct;document.getElementById("wrong").innerText=wrong;document.getElementById("correctPercent").innerText=total>0?Math.round(correct/total*100):0;document.getElementById("wrongPercent").innerText=total>0?Math.round(wrong/total*100):0;}
+function newTask(){document.body.style.backgroundColor="white";document.getElementById("correctAnswer").style.display="none";const keys=Object.keys(taskTypes);const type=keys[rand(0,keys.length-1)];currentTask=taskTypes[type]();document.getElementById("task").innerText=currentTask.question;document.getElementById("answer").value="";document.getElementById("answer").focus();}
+document.getElementById("answer").addEventListener("keydown",function(e){
+if(e.key==="Enter"){
+const userAnswer=Number(this.value),isCorrect=userAnswer===currentTask.answer;
+if(isCorrect){
+document.body.style.backgroundColor="lightgreen";
+updateStats(true);
+setTimeout(newTask,500);
+}else{
+document.body.style.backgroundColor="lightcoral";
+document.getElementById("correctAnswer").innerText=currentTask.answer;
+document.getElementById("correctAnswer").style.display="block";
+updateStats(false);
+setTimeout(newTask,2000);
+}
+}});
+newTask();
+</script>
+</body>
+</html>
